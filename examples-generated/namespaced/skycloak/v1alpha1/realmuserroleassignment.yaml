@@ -1,0 +1,17 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: RealmUserRoleAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/realmuserroleassignment
+  labels:
+    testing.upbound.io/example-name: jdoe_admin
+  name: jdoe-admin
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    realmName: app
+    roleName: admin
+    userId: ${skycloak_realm_user.jdoe.id}

@@ -1,0 +1,18 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: ApplicationRoleAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/applicationroleassignment
+  labels:
+    testing.upbound.io/example-name: web_manage_users
+  name: web-manage-users
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clientId: ${skycloak_application.web.client_id}
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    realmName: app
+    roleClientId: realm-management
+    roleName: manage-users

@@ -1,0 +1,1112 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.20.0
+  name: clustersecurities.skycloak.crossplane.io
+spec:
+  group: skycloak.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - skycloak
+    kind: ClusterSecurity
+    listKind: ClusterSecurityList
+    plural: clustersecurities
+    singular: clustersecurity
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: 'ClusterSecurity is the Schema for the ClusterSecuritys API.
+          Edge-security configuration for a cluster: IP allow-listing, rate limiting,
+          WAF, geo-blocking, bot management, and CAPTCHA. A singleton per cluster.
+          When the captcha block is omitted, the server''s CAPTCHA settings are left
+          untouched. CAPTCHA hostnames are registered via skycloak_captcha_domain.'
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ClusterSecuritySpec defines the desired state of ClusterSecurity
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: |-
+                  DeletionPolicy specifies what will happen to the underlying external
+                  when this managed resource is deleted - either "Delete" or "Orphan" the
+                  external resource.
+                  This field is planned to be deprecated in favor of the ManagementPolicies
+                  field in a future release. Currently, both could be set independently and
+                  non-default values would be honored if the feature flag is enabled.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                properties:
+                  botManagement:
+                    description: (Attributes) Bot detection and challenges. (see below
+                      for nested schema)
+                    properties:
+                      blacklistedAgents:
+                        description: |-
+                          agent regex patterns to always block.
+                          User-agent regex patterns to always block.
+                        items:
+                          type: string
+                        type: array
+                      challengeMode:
+                        description: |-
+                          (String) none, javascript, or captcha.
+                          `none`, `javascript`, or `captcha`.
+                        type: string
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether bot management is enabled.
+                        type: boolean
+                      mode:
+                        description: |-
+                          (String) block or detect.
+                          `block` or `detect`.
+                        type: string
+                      whitelistedAgents:
+                        description: |-
+                          agent regex patterns to always allow.
+                          User-agent regex patterns to always allow.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  captcha:
+                    description: flow CAPTCHA challenges. Omit to leave the server's
+                      CAPTCHA settings unmanaged. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether CAPTCHA challenges are presented.
+                        type: boolean
+                      enabledRealms:
+                        description: |-
+                          (List of String) Realm IDs where challenges are presented during login.
+                          Realm IDs where challenges are presented during login.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  clusterId:
+                    description: |-
+                      (String) Cluster ID. Immutable.
+                      Cluster ID. Immutable.
+                    type: string
+                  clusterIdRef:
+                    description: Reference to a Cluster in skycloak to populate clusterId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  clusterIdSelector:
+                    description: Selector for a Cluster in skycloak to populate clusterId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  geoBlocking:
+                    description: based access control. (see below for nested schema)
+                    properties:
+                      countries:
+                        description: |-
+                          1 alpha-2 country codes.
+                          ISO 3166-1 alpha-2 country codes.
+                        items:
+                          type: string
+                        type: array
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether geo-blocking is enabled.
+                        type: boolean
+                      mode:
+                        description: |-
+                          (String) allowlist or blocklist.
+                          `allowlist` or `blocklist`.
+                        type: string
+                    type: object
+                  ipAccessControl:
+                    description: path IP allow rules. (see below for nested schema)
+                    items:
+                      properties:
+                        allowedCidrs:
+                          description: |-
+                            (List of String) CIDR ranges to allow.
+                            CIDR ranges to allow.
+                          items:
+                            type: string
+                          type: array
+                        allowedIps:
+                          description: |-
+                            (List of String) Individual IPs to allow.
+                            Individual IPs to allow.
+                          items:
+                            type: string
+                          type: array
+                        description:
+                          description: |-
+                            (String) Rule description.
+                            Rule description.
+                          type: string
+                        path:
+                          description: |-
+                            (String) URL path prefix to restrict.
+                            URL path prefix to restrict.
+                          type: string
+                      type: object
+                    type: array
+                  rateLimiting:
+                    description: rate ceilings. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether rate limiting is enabled.
+                        type: boolean
+                      endpointLimits:
+                        description: path request limits. (see below for nested schema)
+                        items:
+                          properties:
+                            path:
+                              description: |-
+                                (String) URL path prefix to restrict.
+                                URL path.
+                              type: string
+                            rpm:
+                              description: |-
+                                (Number) Max requests per minute.
+                                Max requests per minute.
+                              type: number
+                          type: object
+                        type: array
+                      globalRpm:
+                        description: |-
+                          per-minute ceiling.
+                          Global requests-per-minute ceiling.
+                        type: number
+                      perIpRpm:
+                        description: |-
+                          source-IP requests-per-minute ceiling.
+                          Per-source-IP requests-per-minute ceiling.
+                        type: number
+                    type: object
+                  waf:
+                    description: (Attributes) Web application firewall. (see below
+                      for nested schema)
+                    properties:
+                      categories:
+                        description: (Attributes) Active rule categories . (see below
+                          for nested schema)
+                        properties:
+                          crossSiteScripting:
+                            description: (Boolean)
+                            type: boolean
+                          dataLeakage:
+                            description: (Boolean)
+                            type: boolean
+                          javaAttacks:
+                            description: (Boolean)
+                            type: boolean
+                          localFileInclusion:
+                            description: (Boolean)
+                            type: boolean
+                          phpInjection:
+                            description: (Boolean)
+                            type: boolean
+                          protocolAttacks:
+                            description: (Boolean)
+                            type: boolean
+                          protocolEnforcement:
+                            description: (Boolean)
+                            type: boolean
+                          remoteCodeExecution:
+                            description: (Boolean)
+                            type: boolean
+                          remoteFileInclusion:
+                            description: (Boolean)
+                            type: boolean
+                          sessionFixation:
+                            description: (Boolean)
+                            type: boolean
+                          sqlInjection:
+                            description: (Boolean)
+                            type: boolean
+                          webshellDetection:
+                            description: (Boolean)
+                            type: boolean
+                        type: object
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether the WAF is enabled.
+                        type: boolean
+                      exclusionPaths:
+                        description: |-
+                          (List of String) URL paths exempt from inspection.
+                          URL paths exempt from inspection.
+                        items:
+                          type: string
+                        type: array
+                      mode:
+                        description: |-
+                          (String) block or detect.
+                          `block` or `detect`.
+                        type: string
+                      paranoiaLevel:
+                        description: |-
+                          4).
+                          Detection sensitivity (1-4).
+                        type: number
+                      preset:
+                        description: |-
+                          (String) owasp_top_10, full_crs, or custom.
+                          `owasp_top_10`, `full_crs`, or `custom`.
+                        type: string
+                      ruleExclusions:
+                        description: (Attributes List) CRS rules to disable. (see
+                          below for nested schema)
+                        items:
+                          properties:
+                            paths:
+                              description: |-
+                                (List of String) Restrict the exclusion to these paths.
+                                Restrict the exclusion to these paths.
+                              items:
+                                type: string
+                              type: array
+                            ruleIds:
+                              description: |-
+                                (List of String) OWASP CRS rule IDs to disable.
+                                OWASP CRS rule IDs to disable.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              initProvider:
+                description: |-
+                  THIS IS A BETA FIELD. It will be honored
+                  unless the Management Policies feature flag is disabled.
+                  InitProvider holds the same fields as ForProvider, with the exception
+                  of Identifier and other resource reference fields. The fields that are
+                  in InitProvider are merged into ForProvider when the resource is created.
+                  The same fields are also added to the terraform ignore_changes hook, to
+                  avoid updating them after creation. This is useful for fields that are
+                  required on creation, but we do not desire to update them after creation,
+                  for example because of an external controller is managing them, like an
+                  autoscaler.
+                properties:
+                  botManagement:
+                    description: (Attributes) Bot detection and challenges. (see below
+                      for nested schema)
+                    properties:
+                      blacklistedAgents:
+                        description: |-
+                          agent regex patterns to always block.
+                          User-agent regex patterns to always block.
+                        items:
+                          type: string
+                        type: array
+                      challengeMode:
+                        description: |-
+                          (String) none, javascript, or captcha.
+                          `none`, `javascript`, or `captcha`.
+                        type: string
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether bot management is enabled.
+                        type: boolean
+                      mode:
+                        description: |-
+                          (String) block or detect.
+                          `block` or `detect`.
+                        type: string
+                      whitelistedAgents:
+                        description: |-
+                          agent regex patterns to always allow.
+                          User-agent regex patterns to always allow.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  captcha:
+                    description: flow CAPTCHA challenges. Omit to leave the server's
+                      CAPTCHA settings unmanaged. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether CAPTCHA challenges are presented.
+                        type: boolean
+                      enabledRealms:
+                        description: |-
+                          (List of String) Realm IDs where challenges are presented during login.
+                          Realm IDs where challenges are presented during login.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  clusterId:
+                    description: |-
+                      (String) Cluster ID. Immutable.
+                      Cluster ID. Immutable.
+                    type: string
+                  clusterIdRef:
+                    description: Reference to a Cluster in skycloak to populate clusterId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  clusterIdSelector:
+                    description: Selector for a Cluster in skycloak to populate clusterId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  geoBlocking:
+                    description: based access control. (see below for nested schema)
+                    properties:
+                      countries:
+                        description: |-
+                          1 alpha-2 country codes.
+                          ISO 3166-1 alpha-2 country codes.
+                        items:
+                          type: string
+                        type: array
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether geo-blocking is enabled.
+                        type: boolean
+                      mode:
+                        description: |-
+                          (String) allowlist or blocklist.
+                          `allowlist` or `blocklist`.
+                        type: string
+                    type: object
+                  ipAccessControl:
+                    description: path IP allow rules. (see below for nested schema)
+                    items:
+                      properties:
+                        allowedCidrs:
+                          description: |-
+                            (List of String) CIDR ranges to allow.
+                            CIDR ranges to allow.
+                          items:
+                            type: string
+                          type: array
+                        allowedIps:
+                          description: |-
+                            (List of String) Individual IPs to allow.
+                            Individual IPs to allow.
+                          items:
+                            type: string
+                          type: array
+                        description:
+                          description: |-
+                            (String) Rule description.
+                            Rule description.
+                          type: string
+                        path:
+                          description: |-
+                            (String) URL path prefix to restrict.
+                            URL path prefix to restrict.
+                          type: string
+                      type: object
+                    type: array
+                  rateLimiting:
+                    description: rate ceilings. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether rate limiting is enabled.
+                        type: boolean
+                      endpointLimits:
+                        description: path request limits. (see below for nested schema)
+                        items:
+                          properties:
+                            path:
+                              description: |-
+                                (String) URL path prefix to restrict.
+                                URL path.
+                              type: string
+                            rpm:
+                              description: |-
+                                (Number) Max requests per minute.
+                                Max requests per minute.
+                              type: number
+                          type: object
+                        type: array
+                      globalRpm:
+                        description: |-
+                          per-minute ceiling.
+                          Global requests-per-minute ceiling.
+                        type: number
+                      perIpRpm:
+                        description: |-
+                          source-IP requests-per-minute ceiling.
+                          Per-source-IP requests-per-minute ceiling.
+                        type: number
+                    type: object
+                  waf:
+                    description: (Attributes) Web application firewall. (see below
+                      for nested schema)
+                    properties:
+                      categories:
+                        description: (Attributes) Active rule categories . (see below
+                          for nested schema)
+                        properties:
+                          crossSiteScripting:
+                            description: (Boolean)
+                            type: boolean
+                          dataLeakage:
+                            description: (Boolean)
+                            type: boolean
+                          javaAttacks:
+                            description: (Boolean)
+                            type: boolean
+                          localFileInclusion:
+                            description: (Boolean)
+                            type: boolean
+                          phpInjection:
+                            description: (Boolean)
+                            type: boolean
+                          protocolAttacks:
+                            description: (Boolean)
+                            type: boolean
+                          protocolEnforcement:
+                            description: (Boolean)
+                            type: boolean
+                          remoteCodeExecution:
+                            description: (Boolean)
+                            type: boolean
+                          remoteFileInclusion:
+                            description: (Boolean)
+                            type: boolean
+                          sessionFixation:
+                            description: (Boolean)
+                            type: boolean
+                          sqlInjection:
+                            description: (Boolean)
+                            type: boolean
+                          webshellDetection:
+                            description: (Boolean)
+                            type: boolean
+                        type: object
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether the WAF is enabled.
+                        type: boolean
+                      exclusionPaths:
+                        description: |-
+                          (List of String) URL paths exempt from inspection.
+                          URL paths exempt from inspection.
+                        items:
+                          type: string
+                        type: array
+                      mode:
+                        description: |-
+                          (String) block or detect.
+                          `block` or `detect`.
+                        type: string
+                      paranoiaLevel:
+                        description: |-
+                          4).
+                          Detection sensitivity (1-4).
+                        type: number
+                      preset:
+                        description: |-
+                          (String) owasp_top_10, full_crs, or custom.
+                          `owasp_top_10`, `full_crs`, or `custom`.
+                        type: string
+                      ruleExclusions:
+                        description: (Attributes List) CRS rules to disable. (see
+                          below for nested schema)
+                        items:
+                          properties:
+                            paths:
+                              description: |-
+                                (List of String) Restrict the exclusion to these paths.
+                                Restrict the exclusion to these paths.
+                              items:
+                                type: string
+                              type: array
+                            ruleIds:
+                              description: |-
+                                (List of String) OWASP CRS rule IDs to disable.
+                                OWASP CRS rule IDs to disable.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              managementPolicies:
+                default:
+                - '*'
+                description: |-
+                  THIS IS A BETA FIELD. It is on by default but can be opted out
+                  through a Crossplane feature flag.
+                  ManagementPolicies specify the array of actions Crossplane is allowed to
+                  take on the managed and external resources.
+                  This field is planned to replace the DeletionPolicy field in a future
+                  release. Currently, both could be set independently and non-default
+                  values would be honored if the feature flag is enabled. If both are
+                  custom, the DeletionPolicy field will be ignored.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                items:
+                  description: |-
+                    A ManagementAction represents an action that the Crossplane controllers
+                    can take on an external resource.
+                  enum:
+                  - Observe
+                  - Create
+                  - Update
+                  - Delete
+                  - LateInitialize
+                  - '*'
+                  type: string
+                type: array
+              providerConfigRef:
+                default:
+                  name: default
+                description: |-
+                  ProviderConfigReference specifies how the provider that will be used to
+                  create, observe, update, and delete this managed resource should be
+                  configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: |-
+                          Resolution specifies whether resolution of this reference is required.
+                          The default is 'Required', which means the reconcile will fail if the
+                          reference cannot be resolved. 'Optional' means this reference will be
+                          a no-op if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: |-
+                          Resolve specifies when this reference should be resolved. The default
+                          is 'IfNotPresent', which will attempt to resolve the reference only when
+                          the corresponding field is not present. Use 'Always' to resolve the
+                          reference on every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: |-
+                  WriteConnectionSecretToReference specifies the namespace and name of a
+                  Secret to which any connection details for this managed resource should
+                  be written. Connection details frequently include the endpoint, username,
+                  and password required to connect to the managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+          status:
+            description: ClusterSecurityStatus defines the observed state of ClusterSecurity.
+            properties:
+              atProvider:
+                properties:
+                  botManagement:
+                    description: (Attributes) Bot detection and challenges. (see below
+                      for nested schema)
+                    properties:
+                      blacklistedAgents:
+                        description: |-
+                          agent regex patterns to always block.
+                          User-agent regex patterns to always block.
+                        items:
+                          type: string
+                        type: array
+                      challengeMode:
+                        description: |-
+                          (String) none, javascript, or captcha.
+                          `none`, `javascript`, or `captcha`.
+                        type: string
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether bot management is enabled.
+                        type: boolean
+                      mode:
+                        description: |-
+                          (String) block or detect.
+                          `block` or `detect`.
+                        type: string
+                      whitelistedAgents:
+                        description: |-
+                          agent regex patterns to always allow.
+                          User-agent regex patterns to always allow.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  captcha:
+                    description: flow CAPTCHA challenges. Omit to leave the server's
+                      CAPTCHA settings unmanaged. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether CAPTCHA challenges are presented.
+                        type: boolean
+                      enabledRealms:
+                        description: |-
+                          (List of String) Realm IDs where challenges are presented during login.
+                          Realm IDs where challenges are presented during login.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  clusterId:
+                    description: |-
+                      (String) Cluster ID. Immutable.
+                      Cluster ID. Immutable.
+                    type: string
+                  geoBlocking:
+                    description: based access control. (see below for nested schema)
+                    properties:
+                      countries:
+                        description: |-
+                          1 alpha-2 country codes.
+                          ISO 3166-1 alpha-2 country codes.
+                        items:
+                          type: string
+                        type: array
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether geo-blocking is enabled.
+                        type: boolean
+                      mode:
+                        description: |-
+                          (String) allowlist or blocklist.
+                          `allowlist` or `blocklist`.
+                        type: string
+                    type: object
+                  id:
+                    description: (String) cluster_id/security.
+                    type: string
+                  ipAccessControl:
+                    description: path IP allow rules. (see below for nested schema)
+                    items:
+                      properties:
+                        allowedCidrs:
+                          description: |-
+                            (List of String) CIDR ranges to allow.
+                            CIDR ranges to allow.
+                          items:
+                            type: string
+                          type: array
+                        allowedIps:
+                          description: |-
+                            (List of String) Individual IPs to allow.
+                            Individual IPs to allow.
+                          items:
+                            type: string
+                          type: array
+                        description:
+                          description: |-
+                            (String) Rule description.
+                            Rule description.
+                          type: string
+                        path:
+                          description: |-
+                            (String) URL path prefix to restrict.
+                            URL path prefix to restrict.
+                          type: string
+                      type: object
+                    type: array
+                  rateLimiting:
+                    description: rate ceilings. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether rate limiting is enabled.
+                        type: boolean
+                      endpointLimits:
+                        description: path request limits. (see below for nested schema)
+                        items:
+                          properties:
+                            path:
+                              description: |-
+                                (String) URL path prefix to restrict.
+                                URL path.
+                              type: string
+                            rpm:
+                              description: |-
+                                (Number) Max requests per minute.
+                                Max requests per minute.
+                              type: number
+                          type: object
+                        type: array
+                      globalRpm:
+                        description: |-
+                          per-minute ceiling.
+                          Global requests-per-minute ceiling.
+                        type: number
+                      perIpRpm:
+                        description: |-
+                          source-IP requests-per-minute ceiling.
+                          Per-source-IP requests-per-minute ceiling.
+                        type: number
+                    type: object
+                  waf:
+                    description: (Attributes) Web application firewall. (see below
+                      for nested schema)
+                    properties:
+                      categories:
+                        description: (Attributes) Active rule categories . (see below
+                          for nested schema)
+                        properties:
+                          crossSiteScripting:
+                            description: (Boolean)
+                            type: boolean
+                          dataLeakage:
+                            description: (Boolean)
+                            type: boolean
+                          javaAttacks:
+                            description: (Boolean)
+                            type: boolean
+                          localFileInclusion:
+                            description: (Boolean)
+                            type: boolean
+                          phpInjection:
+                            description: (Boolean)
+                            type: boolean
+                          protocolAttacks:
+                            description: (Boolean)
+                            type: boolean
+                          protocolEnforcement:
+                            description: (Boolean)
+                            type: boolean
+                          remoteCodeExecution:
+                            description: (Boolean)
+                            type: boolean
+                          remoteFileInclusion:
+                            description: (Boolean)
+                            type: boolean
+                          sessionFixation:
+                            description: (Boolean)
+                            type: boolean
+                          sqlInjection:
+                            description: (Boolean)
+                            type: boolean
+                          webshellDetection:
+                            description: (Boolean)
+                            type: boolean
+                        type: object
+                      enabled:
+                        description: |-
+                          blocking is enabled.
+                          Whether the WAF is enabled.
+                        type: boolean
+                      exclusionPaths:
+                        description: |-
+                          (List of String) URL paths exempt from inspection.
+                          URL paths exempt from inspection.
+                        items:
+                          type: string
+                        type: array
+                      mode:
+                        description: |-
+                          (String) block or detect.
+                          `block` or `detect`.
+                        type: string
+                      paranoiaLevel:
+                        description: |-
+                          4).
+                          Detection sensitivity (1-4).
+                        type: number
+                      preset:
+                        description: |-
+                          (String) owasp_top_10, full_crs, or custom.
+                          `owasp_top_10`, `full_crs`, or `custom`.
+                        type: string
+                      ruleExclusions:
+                        description: (Attributes List) CRS rules to disable. (see
+                          below for nested schema)
+                        items:
+                          properties:
+                            paths:
+                              description: |-
+                                (List of String) Restrict the exclusion to these paths.
+                                Restrict the exclusion to these paths.
+                              items:
+                                type: string
+                              type: array
+                            ruleIds:
+                              description: |-
+                                (List of String) OWASP CRS rule IDs to disable.
+                                OWASP CRS rule IDs to disable.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        LastTransitionTime is the last time this condition transitioned from one
+                        status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        A Message containing details about this condition's last transition from
+                        one status to another, if any.
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: |-
+                        Type of this condition. At most one of each condition type may apply to
+                        a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              lastHandledReconcileAt:
+                description: |-
+                  LastHandledReconcileAt holds the value of the most recent
+                  reconcile-requested-at annotation token that the controller has
+                  processed. Users can compare this to the annotation to determine
+                  whether a reconcile request has been handled.
+                type: string
+              observedGeneration:
+                description: |-
+                  ObservedGeneration is the latest metadata.generation
+                  which resulted in either a ready state, or stalled due to error
+                  it can not recover from without human intervention.
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,19 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: Export
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/export
+  labels:
+    testing.upbound.io/example-name: nightly
+  name: nightly
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    encryptionPasswordSecretRef:
+      key: example-key
+      name: example-secret
+    format: pgdump
+    includeCredentials: true

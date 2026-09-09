@@ -1,0 +1,18 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: RealmImport
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/realmimport
+  labels:
+    testing.upbound.io/example-name: from_file
+  name: from-file
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+    sourceFile: ${path.module}/customer-portal.zip.enc

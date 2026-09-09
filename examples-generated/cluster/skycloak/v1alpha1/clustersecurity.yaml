@@ -1,0 +1,37 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: ClusterSecurity
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/clustersecurity
+  labels:
+    testing.upbound.io/example-name: production
+  name: production
+spec:
+  forProvider:
+    botManagement:
+      challengeMode: javascript
+      enabled: true
+      mode: block
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    geoBlocking:
+      countries:
+      - KP
+      - RU
+      enabled: true
+      mode: blocklist
+    ipAccessControl:
+    - allowedCidrs:
+      - 203.0.113.0/24
+      description: Office network only
+      path: /admin
+    rateLimiting:
+      enabled: true
+      globalRpm: 60000
+      perIpRpm: 600
+    waf:
+      enabled: true
+      mode: block
+      paranoiaLevel: 1
+      preset: owasp_top_10
