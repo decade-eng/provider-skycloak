@@ -1,0 +1,37 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: Realm
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/realm
+  labels:
+    testing.upbound.io/example-name: app
+  name: app
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    displayName: Application Realm
+    enabled: true
+    loginWithEmailAllowed: true
+    name: app
+
+---
+
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: Cluster
+metadata:
+  annotations:
+    meta.upbound.io/example-id: /v1alpha1/realm
+  labels:
+    testing.upbound.io/example-name: production
+  name: production
+  namespace: crossplane-system
+spec:
+  forProvider:
+    location: eu
+    name: production
+    size: small
+    type: keycloak
+    version: "26.1"

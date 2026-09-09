@@ -1,0 +1,23 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: RealmUser
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/realmuser
+  labels:
+    testing.upbound.io/example-name: jdoe
+  name: jdoe
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    email: jdoe@example.com
+    enabled: true
+    firstName: Jane
+    lastName: Doe
+    realmName: app
+    temporaryPasswordSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    username: jdoe

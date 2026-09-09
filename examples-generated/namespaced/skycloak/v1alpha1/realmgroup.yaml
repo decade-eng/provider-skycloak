@@ -1,0 +1,16 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: RealmGroup
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/realmgroup
+  labels:
+    testing.upbound.io/example-name: engineering
+  name: engineering
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    name: engineering
+    realmName: app

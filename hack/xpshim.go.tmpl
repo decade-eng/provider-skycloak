@@ -1,0 +1,18 @@
+// Package xpshim re-exports the Skycloak Terraform provider
+// constructor, which upstream keeps in an internal package. This file is
+// injected into the vendored provider source under third_party/ by
+// `make provider-source`; it lives inside the provider module boundary,
+// which makes the internal import below legal.
+package xpshim
+
+import (
+	fwprovider "github.com/hashicorp/terraform-plugin-framework/provider"
+
+	"github.com/sky-cloak/terraform-provider-skycloak/internal/provider"
+)
+
+// NewProvider returns the Skycloak Terraform provider as a
+// terraform-plugin-framework provider instance for in-process use by upjet.
+func NewProvider(version string) fwprovider.Provider {
+	return provider.New(version)()
+}

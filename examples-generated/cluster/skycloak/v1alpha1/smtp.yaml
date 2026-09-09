@@ -1,0 +1,25 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: SMTP
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/smtp
+  labels:
+    testing.upbound.io/example-name: app
+  name: app
+spec:
+  forProvider:
+    authType: basic
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    encryption: starttls
+    fromEmail: no-reply@example.com
+    fromName: Example App
+    host: smtp.example.com
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    port: 587
+    realmName: app
+    username: smtp-user

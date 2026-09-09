@@ -1,0 +1,31 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: IdentityProvider
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/identityprovider
+  labels:
+    testing.upbound.io/example-name: google
+  name: google
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clientId: your-google-client-id
+    clientSecretSecretRef:
+      key: example-key
+      name: example-secret
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    config:
+      attributeMappings:
+        email: email
+      buttonText: Sign in with Google
+      oidc:
+        authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth
+        issuer: https://accounts.google.com
+        tokenUrl: https://oauth2.googleapis.com/token
+    displayName: Sign in with Google
+    enabled: true
+    providerId: google
+    realmName: app
+    type: oidc

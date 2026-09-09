@@ -1,0 +1,15 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: ThemeAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/themeassignment
+  labels:
+    testing.upbound.io/example-name: app
+  name: app
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    login: ${local.corporate_theme}
+    realmName: app

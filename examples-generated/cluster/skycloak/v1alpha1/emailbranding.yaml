@@ -1,0 +1,26 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: EmailBranding
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/emailbranding
+  labels:
+    testing.upbound.io/example-name: app
+  name: app
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    companyUrl: https://example.com
+    footerCompanyName: Example, Inc.
+    footerText: You received this email because you have an account with us.
+    headerLogoDarkUrl: https://cdn.example.com/logo-dark.png
+    headerLogoLightUrl: https://cdn.example.com/logo-light.png
+    internationalization:
+      defaultLocale: en
+      enabled: true
+      supportedLocales:
+      - en
+      - de
+    primaryColor: '#111827'
+    realmName: app
