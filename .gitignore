@@ -1,0 +1,14 @@
+/.cache
+/.work
+/_output
+cover.out
+/vendor
+/.vendor-new
+.DS_Store
+
+# ignore IDE folders
+.vscode/
+.idea/
+
+# Vendored Terraform provider source, materialized by `make provider-source`
+third_party/
