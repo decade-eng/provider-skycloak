@@ -1,0 +1,21 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: WebhookSubscription
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/webhooksubscription
+  labels:
+    testing.upbound.io/example-name: ops
+  name: ops
+spec:
+  forProvider:
+    clusterId: ${skycloak_cluster.production.id}
+    eventTypes:
+    - LOGIN_ERROR
+    - USER_DISABLED_BY_PERMANENT_LOCKOUT
+    name: ops-alerts
+    signingSecretSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    source: keycloak
+    url: https://hooks.example.com/skycloak

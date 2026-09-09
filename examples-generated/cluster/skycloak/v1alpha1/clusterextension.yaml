@@ -1,0 +1,18 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: ClusterExtension
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/clusterextension
+  labels:
+    testing.upbound.io/example-name: magic_link
+  name: magic-link
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    extensionId: ${local.magic_link_id}
+    parametersSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system

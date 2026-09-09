@@ -1,0 +1,14 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: CaptchaDomain
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/captchadomain
+  labels:
+    testing.upbound.io/example-name: login
+  name: login
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    hostname: login.example.com

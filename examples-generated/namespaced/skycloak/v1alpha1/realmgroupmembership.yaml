@@ -1,0 +1,17 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: RealmGroupMembership
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/realmgroupmembership
+  labels:
+    testing.upbound.io/example-name: jdoe_eng
+  name: jdoe-eng
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    groupId: ${skycloak_realm_group.engineering.id}
+    realmName: app
+    userId: ${skycloak_realm_user.jdoe.id}

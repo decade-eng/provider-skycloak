@@ -1,0 +1,20 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: ClusterMaintenanceWindow
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/clustermaintenancewindow
+  labels:
+    testing.upbound.io/example-name: production
+  name: production
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    daysOfWeek:
+    - 2
+    - 4
+    enabled: true
+    endLocal: "05:00"
+    startLocal: "02:00"
+    timezone: Europe/Berlin

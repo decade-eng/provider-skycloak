@@ -1,0 +1,20 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: SIEMDestination
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/siemdestination
+  labels:
+    testing.upbound.io/example-name: syslog
+  name: syslog
+  namespace: crossplane-system
+spec:
+  forProvider:
+    name: corporate-siem
+    source:
+      type: security_logs
+    syslog:
+      format: rfc5424
+      host: siem.example.com
+      port: 6514
+      protocol: tls
+    type: syslog

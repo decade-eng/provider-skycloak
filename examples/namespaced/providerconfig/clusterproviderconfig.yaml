@@ -1,0 +1,11 @@
+apiVersion: skycloak.m.crossplane.io/v1beta1
+kind: ClusterProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      name: skycloak-creds
+      namespace: crossplane-system
+      key: credentials

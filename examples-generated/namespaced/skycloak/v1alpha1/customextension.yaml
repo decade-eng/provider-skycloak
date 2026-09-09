@@ -1,0 +1,48 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: CustomExtension
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/customextension
+  labels:
+    testing.upbound.io/example-name: magic_link
+  name: magic-link
+  namespace: crossplane-system
+spec:
+  forProvider:
+    description: Passwordless email login
+    jar: ${path.module}/extensions/magic-link-1.0.0.jar
+    keycloakVersion: "26"
+    name: Magic Link
+    parameterType: global
+    parameters:
+    - key: sender_email
+      label: Sender email
+      required: true
+      type: text
+    - isSensitive: true
+      key: api_key
+      label: Provider API key
+      required: true
+      type: password
+    version: 1.0.0
+
+---
+
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: ClusterExtension
+metadata:
+  annotations:
+    meta.upbound.io/example-id: /v1alpha1/customextension
+  labels:
+    testing.upbound.io/example-name: magic_link
+  name: magic-link
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    extensionId: ${skycloak_custom_extension.magic_link.id}
+    parametersSecretRef:
+      key: example-key
+      name: example-secret

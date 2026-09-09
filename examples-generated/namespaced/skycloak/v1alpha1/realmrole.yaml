@@ -1,0 +1,17 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: RealmRole
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/realmrole
+  labels:
+    testing.upbound.io/example-name: admin
+  name: admin
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    description: Administrators
+    name: admin
+    realmName: app

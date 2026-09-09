@@ -1,0 +1,22 @@
+apiVersion: skycloak.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/application
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clientId: web-app
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    name: Web App
+    pkceRequired: true
+    protocol: openid-connect
+    realmName: app
+    redirectUris:
+    - https://app.example.com/callback
+    type: confidential

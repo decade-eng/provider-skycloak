@@ -1,0 +1,37 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: CustomTheme
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/customtheme
+  labels:
+    testing.upbound.io/example-name: corporate
+  name: corporate
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    name: corporate
+    source: ${path.module}/themes/corporate.zip
+    themeTypes:
+    - login
+    - email
+    version: 1.2.0
+
+---
+
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: ThemeAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: /v1alpha1/customtheme
+  labels:
+    testing.upbound.io/example-name: app
+  name: app
+spec:
+  forProvider:
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    login: ${skycloak_custom_theme.corporate.id}
+    realmName: ${skycloak_realm.app.name}

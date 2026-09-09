@@ -1,0 +1,34 @@
+apiVersion: skycloak.crossplane.io/v1alpha1
+kind: LoginBranding
+metadata:
+  annotations:
+    meta.upbound.io/example-id: skycloak/v1alpha1/loginbranding
+  labels:
+    testing.upbound.io/example-name: app
+  name: app
+spec:
+  forProvider:
+    backgroundColor: '#0f172a'
+    clusterIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: production
+    forgotPasswordEnabled: true
+    internationalization:
+      defaultLocale: en
+      enabled: true
+      languageSelectionMode: automatic_with_selector
+      languageSelectorPosition: top_right
+      languageSelectorStyle: dropdown
+      supportedLocales:
+      - en
+      - fr
+    logoUrl: https://cdn.example.com/logo.png
+    primaryColor: '#0ea5e9'
+    realmName: app
+    registrationEnabled: true
+    showPoweredBy: false
+    sso:
+      buttonSize: medium
+      displayStyle: logo_with_text
+      enabled: true
+      layout: horizontal
