@@ -1,0 +1,1165 @@
+name: sky-cloak/skycloak
+resources:
+    skycloak_application:
+        subCategory: ""
+        description: An OIDC/SAML client (application) in a Skycloak realm.
+        name: skycloak_application
+        title: skycloak_application Resource - skycloak
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "client_id": "web-app",
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "name": "Web App",
+                  "pkce_required": true,
+                  "protocol": "openid-connect",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "redirect_uris": [
+                    "https://app.example.com/callback"
+                  ],
+                  "type": "confidential"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            client_id: (String) OAuth client ID (unique within the realm). Immutable.
+            client_secret: (String, Sensitive) Client secret (confidential clients). Returned on create; use a rotate operation to change it.
+            cluster_id: (String) Cluster ID. Immutable.
+            consent_required: (Boolean) Require user consent. Defaults to false.
+            created_at: (String) Creation timestamp.
+            description: (String) Description.
+            grant_types: (List of String) OAuth grant types enabled for the client.
+            id: (String) Composite ID cluster_id/realm_name/client_id.
+            name: (String) Display name.
+            pkce_required: (Boolean) Require PKCE. Defaults to false.
+            protocol: '(String) Protocol: openid-connect or saml. Immutable.'
+            realm_name: (String) Realm name. Immutable.
+            redirect_uris: (List of String) Allowed redirect URIs.
+            service_account_enabled: (Boolean) Whether a service account (client credentials) is enabled. Read-only.
+            status: (String) Status (active/inactive).
+            type: '(String) Client type: confidential or public. Immutable.'
+            updated_at: (String) Last update timestamp.
+        importStatements: []
+    skycloak_application_role_assignment:
+        subCategory: ""
+        description: Grants a role to an application's service account. One resource per (client, role) edge.
+        name: skycloak_application_role_assignment
+        title: skycloak_application_role_assignment Resource - skycloak
+        examples:
+            - name: web_manage_users
+              manifest: |-
+                {
+                  "client_id": "${skycloak_application.web.client_id}",
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "role_client_id": "realm-management",
+                  "role_name": "manage-users"
+                }
+              references:
+                client_id: skycloak_application.web.client_id
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            client_id: (String) Application client ID receiving the role. Immutable.
+            cluster_id: (String) Cluster ID. Immutable.
+            id: (String) The ID of this resource.
+            realm_name: (String) Realm name. Immutable.
+            role_client_id: (String) Client ID owning the role, for a client role. Omit for a realm role. Immutable.
+            role_name: (String) Role name to assign. Immutable.
+        importStatements: []
+    skycloak_application_secret:
+        subCategory: ""
+        description: Rotates an application's client secret. The secret is regenerated whenever this resource is created or rotate_when changes.
+        name: skycloak_application_secret
+        title: skycloak_application_secret Resource - skycloak
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "client_id": "${skycloak_application.web.client_id}",
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "rotate_when": {
+                    "rotated_on": "2026-01-01"
+                  }
+                }
+              references:
+                client_id: skycloak_application.web.client_id
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            client_id: (String) Application client ID. Immutable.
+            client_secret: (String, Sensitive) The current (rotated) client secret.
+            cluster_id: (String) Cluster ID. Immutable.
+            id: (String) Composite ID cluster_id/realm_name/client_id.
+            realm_name: (String) Realm name. Immutable.
+            rotate_when: (Map of String) Arbitrary key/value map; changing any value forces a new secret to be generated.
+        importStatements: []
+    skycloak_captcha_domain:
+        subCategory: ""
+        description: A hostname registered for CAPTCHA protection on a cluster. The number of registrable hostnames is capped per cluster; the API rejects additions beyond the cap.
+        name: skycloak_captcha_domain
+        title: skycloak_captcha_domain Resource - skycloak
+        examples:
+            - name: login
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "hostname": "login.example.com"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            created_at: (String) Registration timestamp.
+            hostname: (String) Hostname to protect; must be one of the cluster's verified custom domains. Immutable.
+            id: (String) Composite ID cluster_id/hostname.
+        importStatements: []
+    skycloak_client_theme_assignment:
+        subCategory: ""
+        description: Per-client login-theme override. Overrides the realm default for a single OIDC/SAML client.
+        name: skycloak_client_theme_assignment
+        title: skycloak_client_theme_assignment Resource - skycloak
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "client_id": "${skycloak_application.web.client_id}",
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "login": "${local.corporate_theme}",
+                  "realm_name": "${skycloak_realm.app.name}"
+                }
+              references:
+                client_id: skycloak_application.web.client_id
+                cluster_id: skycloak_cluster.production.id
+                login: local.corporate_theme
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            client_id: (String) OIDC/SAML client ID. Immutable.
+            cluster_id: (String) Cluster ID. Immutable.
+            id: (String) Composite ID cluster_id/realm_name/client_id/theme.
+            login: (String) Custom theme ID to activate for this client's login page. Omit to use the realm default.
+            realm_name: (String) Realm name. Immutable.
+        importStatements: []
+    skycloak_cluster:
+        subCategory: ""
+        description: A Skycloak managed Keycloak cluster.
+        name: skycloak_cluster
+        title: skycloak_cluster Resource - skycloak
+        examples:
+            - name: production
+              manifest: |-
+                {
+                  "location": "eu",
+                  "name": "production",
+                  "size": "small",
+                  "type": "keycloak",
+                  "version": "26.1"
+                }
+        argumentDocs:
+            auto_upgrade_enabled: (Boolean) Enable automatic patch upgrades, applied inside the cluster's maintenance window. Defaults to false.
+            id: (String) Cluster ID (UUID).
+            location: (String) Region (us, ca, eu, au). Immutable — changing it replaces the cluster.
+            name: (String) Human-readable cluster name.
+            size: (String) Instance size (small, medium, large).
+            status: (String) Lifecycle status (provisioning, available, ...).
+            type: (String) Cluster type (keycloak or tidecloak). Immutable — changing it replaces the cluster.
+            url: (String) Cluster base URL once available.
+            version: (String) Keycloak version, e.g. 26.1.
+        importStatements: []
+    skycloak_cluster_extension:
+        subCategory: ""
+        description: Installs a marketplace extension on a cluster. Installation is asynchronous; the status reflects provisioning progress. Changing extension_id or parameters reinstalls the extension.
+        name: skycloak_cluster_extension
+        title: skycloak_cluster_extension Resource - skycloak
+        examples:
+            - name: magic_link
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "extension_id": "${local.magic_link_id}",
+                  "parameters": {
+                    "sender_email": "no-reply@example.com"
+                  }
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                extension_id: local.magic_link_id
+        argumentDocs:
+            available_version: (String) Latest available version.
+            cluster_id: (String) Cluster ID. Immutable.
+            extension_id: (String) Catalog extension ID (see the skycloak_extensions data source). Immutable.
+            extension_name: (String) Extension display name.
+            id: (String) Composite ID cluster_id/extension_id.
+            installed_at: (String) Install timestamp (RFC 3339).
+            installed_version: (String) Version currently running on the cluster.
+            parameters: (Map of String, Sensitive) Parameter values keyed by parameter key. Write-only (sensitive values are never read back). Changing this reinstalls the extension.
+            source: (String) Extension source (marketplace, custom).
+            status: (String) Installation status.
+            upgrade_available: (Boolean) Whether a newer version is available.
+        importStatements: []
+    skycloak_cluster_maintenance_window:
+        subCategory: ""
+        description: 'The cluster''s own maintenance window: when Skycloak applies upgrades and other disruptive changes. A singleton per cluster (create == update upsert). Destroying this resource does not leave the cluster without a window: it reverts the cluster to the workspace default window.'
+        name: skycloak_cluster_maintenance_window
+        title: skycloak_cluster_maintenance_window Resource - skycloak
+        examples:
+            - name: production
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "days_of_week": [
+                    2,
+                    4
+                  ],
+                  "enabled": true,
+                  "end_local": "05:00",
+                  "start_local": "02:00",
+                  "timezone": "Europe/Berlin"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            days_of_week: (List of Number) Days of week the window applies to (0 = Sunday ... 6 = Saturday).
+            enabled: (Boolean) Whether the window is active.
+            end_local: (String) Local end time, HH:MM.
+            id: (String) Composite ID cluster_id/maintenance-window.
+            start_local: (String) Local start time, HH:MM.
+            timezone: (String) IANA timezone, e.g. Europe/Berlin.
+        importStatements: []
+    skycloak_cluster_security:
+        subCategory: ""
+        description: 'Edge-security configuration for a cluster: IP allow-listing, rate limiting, WAF, geo-blocking, bot management, and CAPTCHA. A singleton per cluster. When the captcha block is omitted, the server''s CAPTCHA settings are left untouched. CAPTCHA hostnames are registered via skycloak_captcha_domain.'
+        name: skycloak_cluster_security
+        title: skycloak_cluster_security Resource - skycloak
+        examples:
+            - name: production
+              manifest: |-
+                {
+                  "bot_management": {
+                    "challenge_mode": "javascript",
+                    "enabled": true,
+                    "mode": "block"
+                  },
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "geo_blocking": {
+                    "countries": [
+                      "KP",
+                      "RU"
+                    ],
+                    "enabled": true,
+                    "mode": "blocklist"
+                  },
+                  "ip_access_control": [
+                    {
+                      "allowed_cidrs": [
+                        "203.0.113.0/24"
+                      ],
+                      "description": "Office network only",
+                      "path": "/admin"
+                    }
+                  ],
+                  "rate_limiting": {
+                    "enabled": true,
+                    "global_rpm": 60000,
+                    "per_ip_rpm": 600
+                  },
+                  "waf": {
+                    "enabled": true,
+                    "mode": "block",
+                    "paranoia_level": 1,
+                    "preset": "owasp_top_10"
+                  }
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+        argumentDocs:
+            allowed_cidrs: (List of String) CIDR ranges to allow.
+            allowed_ips: (List of String) Individual IPs to allow.
+            blacklisted_agents: (List of String) User-agent regex patterns to always block.
+            bot_management: (Attributes) Bot detection and challenges. (see below for nested schema)
+            captcha: (Attributes) Login-flow CAPTCHA challenges. Omit to leave the server's CAPTCHA settings unmanaged. (see below for nested schema)
+            categories: (Attributes) Active rule categories (required when preset is custom). (see below for nested schema)
+            challenge_mode: (String) none, javascript, or captcha.
+            cluster_id: (String) Cluster ID. Immutable.
+            cross_site_scripting: (Boolean)
+            data_leakage: (Boolean)
+            description: (String) Rule description.
+            enabled: (Boolean) Whether bot management is enabled.
+            enabled_realms: (List of String) Realm IDs where challenges are presented during login.
+            endpoint_limits: (Attributes List) Per-path request limits. (see below for nested schema)
+            exclusion_paths: (List of String) URL paths exempt from inspection.
+            geo_blocking: (Attributes) Country-based access control. (see below for nested schema)
+            geo_blocking.countries: (List of String) ISO 3166-1 alpha-2 country codes.
+            geo_blocking.enabled: (Boolean) Whether geo-blocking is enabled.
+            geo_blocking.mode: (String) allowlist or blocklist.
+            global_rpm: (Number) Global requests-per-minute ceiling.
+            id: (String) cluster_id/security.
+            ip_access_control: (Attributes List) Per-path IP allow rules. (see below for nested schema)
+            java_attacks: (Boolean)
+            local_file_inclusion: (Boolean)
+            mode: (String) block or detect.
+            paranoia_level: (Number) Detection sensitivity (1-4).
+            path: (String) URL path prefix to restrict.
+            paths: (List of String) Restrict the exclusion to these paths.
+            per_ip_rpm: (Number) Per-source-IP requests-per-minute ceiling.
+            php_injection: (Boolean)
+            preset: (String) owasp_top_10, full_crs, or custom.
+            protocol_attacks: (Boolean)
+            protocol_enforcement: (Boolean)
+            rate_limiting: (Attributes) Request-rate ceilings. (see below for nested schema)
+            remote_code_execution: (Boolean)
+            remote_file_inclusion: (Boolean)
+            rpm: (Number) Max requests per minute.
+            rule_exclusions: (Attributes List) CRS rules to disable. (see below for nested schema)
+            rule_ids: (List of String) OWASP CRS rule IDs to disable.
+            session_fixation: (Boolean)
+            sql_injection: (Boolean)
+            waf: (Attributes) Web application firewall. (see below for nested schema)
+            webshell_detection: (Boolean)
+            whitelisted_agents: (List of String) User-agent regex patterns to always allow.
+        importStatements: []
+    skycloak_custom_extension:
+        subCategory: ""
+        description: Uploads a custom Keycloak extension JAR to the workspace catalog. Changing the JAR contents or version publishes a new version; other metadata updates in place. Install it on a cluster with skycloak_cluster_extension.
+        name: skycloak_custom_extension
+        title: skycloak_custom_extension Resource - skycloak
+        examples:
+            - name: magic_link
+              manifest: |-
+                {
+                  "description": "Passwordless email login",
+                  "jar": "${path.module}/extensions/magic-link-1.0.0.jar",
+                  "keycloak_version": "26",
+                  "name": "Magic Link",
+                  "parameter_type": "global",
+                  "parameters": [
+                    {
+                      "key": "sender_email",
+                      "label": "Sender email",
+                      "required": true,
+                      "type": "text"
+                    },
+                    {
+                      "is_sensitive": true,
+                      "key": "api_key",
+                      "label": "Provider API key",
+                      "required": true,
+                      "type": "password"
+                    }
+                  ],
+                  "version": "1.0.0"
+                }
+              dependencies:
+                skycloak_cluster_extension.magic_link: |-
+                    {
+                      "cluster_id": "${skycloak_cluster.production.id}",
+                      "extension_id": "${skycloak_custom_extension.magic_link.id}",
+                      "parameters": {
+                        "api_key": "${var.magic_link_api_key}",
+                        "sender_email": "no-reply@example.com"
+                      }
+                    }
+        argumentDocs:
+            content_sha256: (String) SHA-256 of the uploaded JAR. Recomputed each plan; a change publishes a new version.
+            created_at: (String) Creation timestamp (RFC 3339).
+            default_value: (String) Default value.
+            description: (String) Extension description.
+            icon_url: (String) Icon URL.
+            id: (String) Extension ID.
+            is_sensitive: (Boolean) Whether the value is write-only/secret.
+            jar: (String) Path to the extension JAR file.
+            key: (String) Unique parameter identifier.
+            keycloak_version: (String) Keycloak major version this JAR targets (e.g. 26).
+            label: (String) Human-readable label.
+            name: (String) Extension name.
+            options: (Attributes List) Choices for a dropdown parameter. (see below for nested schema)
+            parameter_type: (String) How parameters are supplied to the extension.
+            parameters: (Attributes List) Configuration parameter schema exposed when installing the extension. (see below for nested schema)
+            repository_url: (String) Source repository URL.
+            required: (Boolean) Whether the parameter must be supplied.
+            scan_status: (String) Malware scan result.
+            source: (String) Extension source (always custom for this resource).
+            type: '(String) Field type: text, password, number, checkbox, or dropdown.'
+            updated_at: (String) Last update timestamp (RFC 3339).
+            value: (String) Option value.
+            version: (String) Semantic version (e.g. 1.0.0). Bump it together with the JAR to publish a new version.
+        importStatements: []
+    skycloak_custom_theme:
+        subCategory: ""
+        description: Uploads a custom Keycloak theme (ZIP or Keycloakify JAR) to a cluster. Replacing the file contents or theme_types recreates the theme; name, description, and version update in place.
+        name: skycloak_custom_theme
+        title: skycloak_custom_theme Resource - skycloak
+        examples:
+            - name: corporate
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "name": "corporate",
+                  "source": "${path.module}/themes/corporate.zip",
+                  "theme_types": [
+                    "login",
+                    "email"
+                  ],
+                  "version": "1.2.0"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+              dependencies:
+                skycloak_theme_assignment.app: |-
+                    {
+                      "cluster_id": "${skycloak_cluster.production.id}",
+                      "login": "${skycloak_custom_theme.corporate.id}",
+                      "realm_name": "${skycloak_realm.app.name}"
+                    }
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            content_sha256: (String) SHA-256 of the uploaded file. Recomputed each plan; a change recreates the theme.
+            deployed_at: (String) Last successful deployment timestamp (RFC 3339).
+            description: (String) Theme description.
+            file_size: (Number) Size of the uploaded archive in bytes.
+            id: (String) Theme ID.
+            name: (String) Theme name.
+            source: (String) Path to the theme archive (.zip or .jar).
+            status: (String) Deployment status (deployed, deploying, failed, undeploying).
+            theme_types: (List of String) Subset of theme types to deploy (login, account, admin, email). Omit to deploy all detected types. Immutable.
+            version: (String) Semantic version (e.g. 1.2.3).
+        importStatements: []
+    skycloak_domain:
+        subCategory: ""
+        description: A custom domain on a Skycloak cluster. After apply, create the returned dns_records at your DNS provider; verification then completes out of band (refresh to observe verification_status).
+        name: skycloak_domain
+        title: skycloak_domain Resource - skycloak
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "domain": "auth.example.com"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            cname_target: (String) CNAME target to point the domain at.
+            created_at: (String)
+            dns_records: (Attributes List) DNS records to create for verification/routing. (see below for nested schema)
+            domain: (String) Fully-qualified domain name. Immutable.
+            id: (String) Domain ID (UUID).
+            is_active: (Boolean) Whether the domain is active.
+            name: (String)
+            ssl_status: (String) SSL provisioning status.
+            subdomain: (String) Optional subdomain. Immutable.
+            type: (String)
+            updated_at: (String)
+            value: (String)
+            verification_status: (String) DNS verification status.
+        importStatements: []
+    skycloak_domain_route:
+        subCategory: ""
+        description: Maps a realm onto a custom domain.
+        name: skycloak_domain_route
+        title: skycloak_domain_route Resource - skycloak
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "cors_allowed_origins": [
+                    "https://app.example.com"
+                  ],
+                  "domain_id": "${skycloak_domain.app.id}",
+                  "hide_realm_path": true,
+                  "realm": "${skycloak_realm.app.name}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                domain_id: skycloak_domain.app.id
+                realm: skycloak_realm.app.name
+        argumentDocs:
+            allow_admin_access: (Boolean) Allow admin console access through this route. Defaults to false.
+            cluster_id: (String) Cluster ID. Immutable.
+            cors_allowed_origins: (List of String) CORS allowed origins for this route.
+            created_at: (String)
+            domain_id: (String) Custom domain ID. Immutable.
+            hide_realm_path: (Boolean) Serve the realm at the domain root (hide /realms/<name>). Set at creation; immutable.
+            id: (String) Route ID (UUID).
+            realm: (String) Realm to route. Immutable.
+            updated_at: (String)
+        importStatements: []
+    skycloak_email_branding:
+        subCategory: ""
+        description: Email-template branding for a realm (a singleton; create == update upsert).
+        name: skycloak_email_branding
+        title: skycloak_email_branding Resource - skycloak
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "company_url": "https://example.com",
+                  "footer_company_name": "Example, Inc.",
+                  "footer_text": "You received this email because you have an account with us.",
+                  "header_logo_dark_url": "https://cdn.example.com/logo-dark.png",
+                  "header_logo_light_url": "https://cdn.example.com/logo-light.png",
+                  "internationalization": {
+                    "default_locale": "en",
+                    "enabled": true,
+                    "supported_locales": [
+                      "en",
+                      "de"
+                    ]
+                  },
+                  "primary_color": "#111827",
+                  "realm_name": "${skycloak_realm.app.name}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            company_url: (String) URL linked from the email footer.
+            default_locale: (String) Default locale (BCP 47 tag, e.g. en).
+            enabled: (Boolean) Whether internationalization is enabled.
+            footer_company_name: (String) Company name shown in the email footer.
+            footer_text: (String) Free-text shown in the email footer.
+            header_logo_dark_url: (String) Logo URL for dark-background email clients.
+            header_logo_light_url: (String) Logo URL for light-background email clients.
+            id: (String) Composite ID cluster_id/realm_name/email_branding.
+            internationalization: (Attributes) Email internationalization settings. (see below for nested schema)
+            primary_color: '(String) Primary accent color (hex, e.g. #0ea5e9).'
+            realm_name: (String) Realm name. Immutable.
+            status: (String) Deployment status (applied, applying, failed).
+            supported_locales: (List of String) Locales available to users. Must include default_locale.
+        importStatements: []
+    skycloak_export:
+        subCategory: ""
+        description: A one-shot database export job for a cluster. Creating the resource starts the export and waits for it to finish. The archive expires; recreate the resource to produce a fresh export.
+        name: skycloak_export
+        title: skycloak_export Resource - skycloak
+        examples:
+            - name: nightly
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "encryption_password": "${var.export_password}",
+                  "format": "pgdump",
+                  "include_credentials": true
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                encryption_password: var.export_password
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            completed_at: (String) Completion timestamp (RFC 3339).
+            created_at: (String) Creation timestamp (RFC 3339).
+            download_url: (String, Sensitive) Time-limited presigned download URL. Expires; refresh to obtain a new one.
+            encryption_password: (String, Sensitive) Password used to encrypt the archive (AES-256-CBC). Required when include_credentials is true. Write-only; never read back. Immutable.
+            expires_at: (String) When the archive is deleted from storage (RFC 3339).
+            file_size_bytes: (Number) Size of the produced archive in bytes.
+            format: '(String) Export format: pgdump or sql. Immutable.'
+            id: (String) Export job ID.
+            include_credentials: (Boolean) Include the Keycloak credential and related tables. Requires encryption_password. Immutable.
+            is_encrypted: (Boolean) Whether the archive is encrypted.
+            progress: (Number) Completion percentage (0-100).
+            sha256_checksum: (String) SHA-256 checksum of the archive (hex).
+            status: (String) Job status (pending, processing, completed, failed).
+        importStatements: []
+    skycloak_identity_provider:
+        subCategory: ""
+        description: An identity provider (SSO connection) in a Skycloak realm.
+        name: skycloak_identity_provider
+        title: skycloak_identity_provider Resource - skycloak
+        examples:
+            - name: google
+              manifest: |-
+                {
+                  "client_id": "your-google-client-id",
+                  "client_secret": "${var.google_client_secret}",
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "config": {
+                    "attribute_mappings": {
+                      "email": "email"
+                    },
+                    "button_text": "Sign in with Google",
+                    "oidc": {
+                      "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth",
+                      "issuer": "https://accounts.google.com",
+                      "token_url": "https://oauth2.googleapis.com/token"
+                    }
+                  },
+                  "display_name": "Sign in with Google",
+                  "enabled": true,
+                  "provider_id": "google",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "type": "oidc"
+                }
+              references:
+                client_secret: var.google_client_secret
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            attribute_mappings: (Map of String) Keycloak attribute → IdP claim mappings.
+            authorization_url: (String) Authorization endpoint URL.
+            base_dn: (String) Base DN.
+            bind_dn: (String) Bind DN.
+            button_text: (String) Login button label.
+            client_id: (String) Upstream client/application ID.
+            client_secret: (String, Sensitive) Upstream client secret. Write-only; never read back.
+            cluster_id: (String) Cluster ID. Immutable.
+            config: (Attributes) Provider configuration. (see below for nested schema)
+            created_at: (String) Creation timestamp.
+            display_name: (String) Display name shown on the login page.
+            enabled: (Boolean) Whether the provider is enabled. Defaults to true.
+            entity_id: (String) IdP entity ID.
+            externally_managed: (Boolean) True if the provider is managed outside Skycloak; such providers reject updates and deletes.
+            icon_url: (String) Login button icon URL.
+            id: (String) Composite ID cluster_id/realm_name/provider_id.
+            issuer: (String) Issuer URL.
+            ldap: (Attributes) LDAP settings (when type is ldap). (see below for nested schema)
+            logout_url: (String) Logout endpoint URL.
+            metadata_url: (String) IdP metadata URL.
+            metadata_xml: (String) IdP metadata XML.
+            oidc: (Attributes) OIDC endpoints (when type is oidc). (see below for nested schema)
+            provider_id: (String) Unique provider alias within the realm. Immutable.
+            realm_name: (String) Realm name. Immutable.
+            saml: (Attributes) SAML settings (when type is saml). (see below for nested schema)
+            server_url: (String) LDAP server URL.
+            sso_url: (String) Single sign-on service URL.
+            sync_mode: (String) User profile sync mode (IMPORT, LEGACY, FORCE).
+            token_url: (String) Token endpoint URL.
+            trust_email: (Boolean) Trust email addresses from this provider.
+            type: '(String) Provider kind: oidc, saml, or ldap. Immutable.'
+            updated_at: (String) Last update timestamp.
+            userinfo_url: (String) Userinfo endpoint URL.
+        importStatements: []
+    skycloak_login_branding:
+        subCategory: ""
+        description: Login-page branding for a realm (a singleton; create == update upsert).
+        name: skycloak_login_branding
+        title: skycloak_login_branding Resource - skycloak
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "background_color": "#0f172a",
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "forgot_password_enabled": true,
+                  "internationalization": {
+                    "default_locale": "en",
+                    "enabled": true,
+                    "language_selection_mode": "automatic_with_selector",
+                    "language_selector_position": "top_right",
+                    "language_selector_style": "dropdown",
+                    "supported_locales": [
+                      "en",
+                      "fr"
+                    ]
+                  },
+                  "logo_url": "https://cdn.example.com/logo.png",
+                  "primary_color": "#0ea5e9",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "registration_enabled": true,
+                  "show_powered_by": false,
+                  "sso": {
+                    "button_size": "medium",
+                    "display_style": "logo_with_text",
+                    "enabled": true,
+                    "layout": "horizontal"
+                  }
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            background_color: (String) Login page background color (hex).
+            button_size: (String) small, medium, or large.
+            cluster_id: (String) Cluster ID. Immutable.
+            default_locale: (String) Default locale (BCP 47 tag, e.g. en).
+            display_style: (String) logo_only, logo_with_text, or text_only.
+            enabled: (Boolean) Whether internationalization is enabled.
+            favicon_url: (String) URL of the browser favicon.
+            font_url: (String) URL of a custom web font.
+            forgot_password_enabled: (Boolean) Defaults to the API's value when unset.
+            id: (String) Composite ID cluster_id/realm_name/login_branding.
+            internationalization: (Attributes) Login page internationalization settings. (see below for nested schema)
+            language_selection_mode: (String) automatic_only, automatic_with_selector, hide_selector, or selector_only.
+            language_selector_position: (String) form_inside_header, form_inside_left, top_left, top_middle, or top_right.
+            language_selector_style: (String) dropdown, flags, or text_labels.
+            layout: (String) horizontal or vertical.
+            logo_url: (String) URL of the logo displayed on the login page.
+            primary_color: '(String) Primary accent color applied to buttons (hex, e.g. #0ea5e9).'
+            privacy_policy_url: (String) URL of the privacy policy linked in the footer.
+            realm_name: (String) Realm name. Immutable.
+            registration_enabled: (Boolean) Defaults to the API's value when unset.
+            remember_me_enabled: (Boolean) Defaults to the API's value when unset.
+            show_powered_by: (Boolean) Defaults to the API's value when unset.
+            sso: (Attributes) Identity-provider button display on the login page. (see below for nested schema)
+            status: (String) Deployment status (applied, applying, failed).
+            supported_locales: (List of String) Locales available to users. Must include default_locale.
+            terms_of_service_url: (String) URL of the terms of service linked in the footer.
+        importStatements: []
+    skycloak_realm:
+        subCategory: ""
+        description: A Keycloak realm within a Skycloak cluster.
+        name: skycloak_realm
+        title: skycloak_realm Resource - skycloak
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "display_name": "Application Realm",
+                  "enabled": true,
+                  "login_with_email_allowed": true,
+                  "name": "app"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+              dependencies:
+                skycloak_cluster.production: |-
+                    {
+                      "location": "eu",
+                      "name": "production",
+                      "size": "small",
+                      "type": "keycloak",
+                      "version": "26.1"
+                    }
+        argumentDocs:
+            cluster_id: (String) ID of the cluster the realm belongs to. Immutable.
+            created_at: (String) Creation timestamp.
+            display_name: (String) Human-readable realm display name.
+            duplicate_emails_allowed: (Boolean) Allow duplicate emails across users. Defaults to false.
+            enabled: (Boolean) Whether the realm is enabled. Defaults to true.
+            id: (String) Composite ID cluster_id/name.
+            login_with_email_allowed: (Boolean) Allow login with email. Defaults to false.
+            name: (String) Realm name (the Keycloak realm key). Immutable.
+            registration_allowed: (Boolean) Allow self-registration. Defaults to false.
+            registration_email_as_username: (Boolean) Use email as username on registration. Defaults to false.
+            ssl_required: '(String) SSL requirement: external, all, or none. Defaults to external.'
+        importStatements: []
+    skycloak_realm_export:
+        subCategory: ""
+        description: A one-shot export of a single realm (configuration, users, and credentials). Creating the resource starts the export and waits for it to finish. The archive is always encrypted and Skycloak deletes it 24 hours after completion, so download_url becomes null once expires_at has passed — recreate the resource to produce a fresh export.
+        name: skycloak_realm_export
+        title: skycloak_realm_export Resource - skycloak
+        examples:
+            - name: customer_portal
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "encryption_password": "${var.realm_export_password}",
+                  "realm": "${skycloak_realm.customer_portal.name}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                encryption_password: var.realm_export_password
+                realm: skycloak_realm.customer_portal.name
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            completed_at: (String) Completion timestamp (RFC 3339).
+            created_at: (String) Creation timestamp (RFC 3339).
+            download_url: (String, Sensitive) Time-limited presigned download URL. Null once the archive has expired.
+            encryption_password: '(String, Sensitive) Password used to encrypt the archive (AES-256-CBC, PBKDF2), 8-128 characters. Required: every realm export contains credentials. Write-only; never read back, so an imported resource plans a replacement until it is set. Immutable.'
+            expires_at: (String) When the archive is deleted from storage, 24h after completion (RFC 3339).
+            id: (String) Realm export job ID.
+            progress: (Number) Completion percentage (0-100).
+            realm: (String) Name of the realm to export. Immutable.
+            scope: (String) Export scope. Only full is currently supported. Immutable.
+            sha256_checksum: (String) SHA-256 checksum of the encrypted archive (hex).
+            source_version: (String) Keycloak version that produced the export. An import target must run this version or newer.
+            status: (String) Job status (pending, processing, completed, failed).
+        importStatements: []
+    skycloak_realm_group:
+        subCategory: ""
+        description: A realm group. Add users with skycloak_realm_group_membership.
+        name: skycloak_realm_group
+        title: skycloak_realm_group Resource - skycloak
+        examples:
+            - name: engineering
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "name": "engineering",
+                  "realm_name": "${skycloak_realm.app.name}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+            - name: backend
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "name": "backend",
+                  "parent_id": "${skycloak_realm_group.engineering.id}",
+                  "realm_name": "${skycloak_realm.app.name}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                parent_id: skycloak_realm_group.engineering.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            id: (String) Group ID.
+            name: (String) Group name (leaf segment of the path).
+            parent_id: (String) Parent group ID for a nested group. Immutable.
+            path: (String) Canonical group path.
+            realm_name: (String) Realm name. Immutable.
+        importStatements: []
+    skycloak_realm_group_membership:
+        subCategory: ""
+        description: Adds a user to a realm group. One resource per (user, group) edge.
+        name: skycloak_realm_group_membership
+        title: skycloak_realm_group_membership Resource - skycloak
+        examples:
+            - name: jdoe_eng
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "group_id": "${skycloak_realm_group.engineering.id}",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "user_id": "${skycloak_realm_user.jdoe.id}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                group_id: skycloak_realm_group.engineering.id
+                realm_name: skycloak_realm.app.name
+                user_id: skycloak_realm_user.jdoe.id
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            group_id: (String) Group ID. Immutable.
+            id: (String) The ID of this resource.
+            realm_name: (String) Realm name. Immutable.
+            user_id: (String) User ID. Immutable.
+        importStatements: []
+    skycloak_realm_import:
+        subCategory: ""
+        description: 'Imports a realm (configuration, users, and credentials) into a cluster. Creating the resource starts the import and waits for it to finish. The resource tracks the import job, not the resulting realm: destroying it removes the job from state and leaves the imported realm in place. Preflight validates the target Keycloak version, refuses a realm-name collision, and blocks on missing password-hash providers.'
+        name: skycloak_realm_import
+        title: skycloak_realm_import Resource - skycloak
+        examples:
+            - name: from_file
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "password": "${var.realm_artifact_password}",
+                  "source_file": "${path.module}/customer-portal.zip.enc"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                password: var.realm_artifact_password
+            - name: from_export
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.staging.id}",
+                  "password": "${var.realm_export_password}",
+                  "source_export_id": "${skycloak_realm_export.customer_portal.id}",
+                  "source_kind": "stored"
+                }
+              references:
+                cluster_id: skycloak_cluster.staging.id
+                password: var.realm_export_password
+                source_export_id: skycloak_realm_export.customer_portal.id
+        argumentDocs:
+            cluster_id: (String) Target cluster ID. Immutable.
+            completed_at: (String) Completion timestamp (RFC 3339).
+            created_at: (String) Creation timestamp (RFC 3339).
+            id: (String) Realm import job ID.
+            password: (String, Sensitive) Password that decrypts the artifact. Required for an encrypted archive (anything produced by skycloak_realm_export); omit only for a bare foreign realm JSON. Write-only; never read back. Immutable.
+            progress: (Number) Completion percentage (0-100).
+            realm: (String) Name of the imported realm, derived from the artifact.
+            source_export_id: (String) ID of a stored skycloak_realm_export to import from. Required when source_kind is stored. Immutable.
+            source_file: (String) Path to a local realm artifact to upload. Required when source_kind is upload. Immutable.
+            source_file_sha256: (String) SHA-256 of source_file, tracked so a change to the file's bytes forces a new import even when the path is unchanged.
+            source_kind: '(String) Where the artifact comes from: upload (default, uses source_file) or stored (uses source_export_id). Immutable.'
+            source_version: (String) Keycloak version that produced the artifact.
+            status: (String) Job status (pending, processing, completed, failed).
+            target_version: (String) Target cluster's Keycloak version at import time.
+        importStatements: []
+    skycloak_realm_role:
+        subCategory: ""
+        description: A realm-scoped role. Assign it to users with skycloak_realm_user_role_assignment.
+        name: skycloak_realm_role
+        title: skycloak_realm_role Resource - skycloak
+        examples:
+            - name: admin
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "description": "Administrators",
+                  "name": "admin",
+                  "realm_name": "${skycloak_realm.app.name}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            client_role: (Boolean) Whether this is a client-scoped role.
+            cluster_id: (String) Cluster ID. Immutable.
+            composite: (Boolean) Whether this role is composed from other roles.
+            description: (String) Human-friendly role description.
+            id: (String) Composite ID cluster_id/realm_name/role_name.
+            name: (String) Role name. Immutable (renaming recreates the role).
+            realm_name: (String) Realm name. Immutable.
+        importStatements: []
+    skycloak_realm_user:
+        subCategory: ""
+        description: A realm user. Grant roles with skycloak_realm_user_role_assignment and group membership with skycloak_realm_group_membership.
+        name: skycloak_realm_user
+        title: skycloak_realm_user Resource - skycloak
+        examples:
+            - name: jdoe
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "email": "jdoe@example.com",
+                  "enabled": true,
+                  "first_name": "Jane",
+                  "last_name": "Doe",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "temporary_password": "${var.jdoe_password}",
+                  "username": "jdoe"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+                temporary_password: var.jdoe_password
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            created_at: (String) Creation timestamp (RFC 3339).
+            email: (String) Email address.
+            email_verified: (Boolean) Whether the email address is verified. Defaults to false.
+            enabled: (Boolean) Whether the user can sign in. Defaults to true.
+            first_name: (String) First name.
+            id: (String) User ID.
+            last_login_at: (String) Most recent sign-in (RFC 3339).
+            last_name: (String) Last name.
+            realm_name: (String) Realm name. Immutable.
+            temporary_password: (String, Sensitive) Initial password (min 8 chars). Write-only; changing it recreates the user (there is no password-update endpoint).
+            username: (String) Username. Immutable.
+        importStatements: []
+    skycloak_realm_user_role_assignment:
+        subCategory: ""
+        description: Assigns a single realm role to a user. One resource per (user, role) edge.
+        name: skycloak_realm_user_role_assignment
+        title: skycloak_realm_user_role_assignment Resource - skycloak
+        examples:
+            - name: jdoe_admin
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "role_name": "${skycloak_realm_role.admin.name}",
+                  "user_id": "${skycloak_realm_user.jdoe.id}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                realm_name: skycloak_realm.app.name
+                role_name: skycloak_realm_role.admin.name
+                user_id: skycloak_realm_user.jdoe.id
+        argumentDocs:
+            cluster_id: (String) Cluster ID. Immutable.
+            id: (String) The ID of this resource.
+            realm_name: (String) Realm name. Immutable.
+            role_name: (String) Realm role name. Immutable.
+            user_id: (String) User ID. Immutable.
+        importStatements: []
+    skycloak_siem_destination:
+        subCategory: ""
+        description: 'A SIEM forwarding destination for the workspace (syslog, S3, or HTTP). SIEM forwarding is plan-gated; the API rejects the calls on plans without it. Secret fields are write-only: the API never returns them, reads report has_* booleans instead, and Terraform keeps the configured values in state.'
+        name: skycloak_siem_destination
+        title: skycloak_siem_destination Resource - skycloak
+        examples:
+            - name: syslog
+              manifest: |-
+                {
+                  "name": "corporate-siem",
+                  "source": {
+                    "type": "security_logs"
+                  },
+                  "syslog": {
+                    "format": "rfc5424",
+                    "host": "siem.example.com",
+                    "port": 6514,
+                    "protocol": "tls"
+                  },
+                  "type": "syslog"
+                }
+            - name: splunk
+              manifest: |-
+                {
+                  "batch": {
+                    "max_events": 500,
+                    "max_interval_seconds": 30
+                  },
+                  "http": {
+                    "auth_type": "bearer",
+                    "bearer_token": "${var.splunk_hec_token}",
+                    "url": "https://hec.example.com/services/collector"
+                  },
+                  "name": "splunk-hec",
+                  "source": {
+                    "keycloak_event_types": [
+                      "LOGIN",
+                      "LOGIN_ERROR",
+                      "LOGOUT"
+                    ],
+                    "type": "keycloak_events"
+                  },
+                  "type": "http"
+                }
+        argumentDocs:
+            access_key_id: (String, Sensitive) Access key ID (when auth_type is access_key). Write-only.
+            auth_type: (String) basic, bearer, or none.
+            batch: (Attributes) Batching tuning. Defaults to the API contract values (1000 events, 60 seconds) so an omitted block plans exactly what the server applies. (see below for nested schema)
+            bearer_token: (String, Sensitive) Bearer token (when auth_type is bearer). Write-only.
+            bucket: (String) Bucket name.
+            cluster_ids: (List of String) Cluster IDs to include. Omit for all clusters.
+            created_at: (String)
+            enabled: (Boolean) Whether forwarding is active. Defaults to true.
+            external_id: (String) External ID for role assumption.
+            failure_count: (Number) Consecutive delivery failures.
+            format: (String) rfc5424, cef, leef, or json.
+            has_access_key_secret: (Boolean) Whether a secret access key is stored.
+            has_auth_credentials: (Boolean) Whether auth credentials are stored.
+            headers: (Map of String, Sensitive) Extra HTTP headers. Values are write-only; reads return header names only.
+            health_status: (String) healthy, degraded, or failed.
+            host: (String) Syslog server hostname or IP.
+            http: (Attributes) HTTP destination config (when type is http). (see below for nested schema)
+            id: (String) Destination ID (UUID).
+            keycloak_event_types: (List of String) Keycloak event type codes. Required when type is keycloak_events.
+            last_error: (String) Most recent delivery error.
+            last_sent_at: (String) Last successful delivery.
+            max_events: (Number) Flush after this many events. Defaults to 1000.
+            max_interval_seconds: (Number) Flush at least this often. Defaults to 60.
+            name: (String) Destination name.
+            password: (String, Sensitive) Password (when auth_type is basic). Write-only.
+            port: (Number) Syslog server port.
+            prefix: (String) Object key prefix.
+            protocol: (String) tcp, tls, or udp.
+            realms: (List of String) Realm names to include. Omit for all realms.
+            region: (String) Bucket region.
+            role_arn: (String) Role ARN (when auth_type is assume_role).
+            s3: (Attributes) S3 destination config (when type is s3). (see below for nested schema)
+            secret_access_key: (String, Sensitive) Secret access key (when auth_type is access_key). Write-only.
+            source: (Attributes) Which workspace data stream is forwarded. (see below for nested schema)
+            syslog: (Attributes) Syslog destination config (when type is syslog). (see below for nested schema)
+            total_bytes_sent: (Number)
+            total_events_sent: (Number)
+            total_logs_sent: (Number)
+            type: '(String) Destination type: syslog, s3, or http. Immutable.'
+            updated_at: (String)
+            url: (String) Collector endpoint URL.
+            username: (String) Username (when auth_type is basic).
+        importStatements: []
+    skycloak_smtp:
+        subCategory: ""
+        description: SMTP configuration for a realm (a singleton; create == update upsert).
+        name: skycloak_smtp
+        title: skycloak_smtp Resource - skycloak
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "auth_type": "basic",
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "encryption": "starttls",
+                  "from_email": "no-reply@example.com",
+                  "from_name": "Example App",
+                  "host": "smtp.example.com",
+                  "password": "${var.smtp_password}",
+                  "port": 587,
+                  "realm_name": "${skycloak_realm.app.name}",
+                  "username": "smtp-user"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                password: var.smtp_password
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            auth_type: '(String) Authentication type: basic or oauth2.'
+            client_id: (String) OAuth 2.0 client ID (when auth_type is oauth2).
+            client_secret: (String, Sensitive) OAuth 2.0 client secret. Write-only; never read back. Omit to retain the stored value.
+            cluster_id: (String) Cluster ID. Immutable.
+            encryption: '(String) Encryption mode: none, ssl, or starttls. Defaults to none.'
+            from_email: (String) Sender email address.
+            from_name: (String) Sender display name.
+            has_client_secret: (Boolean) Whether a client secret is stored.
+            has_password: (Boolean) Whether a password is stored.
+            host: (String) SMTP server hostname or IP.
+            id: (String) Composite ID cluster_id/realm_name/smtp.
+            password: (String, Sensitive) SMTP password (when auth_type is basic). Write-only; never read back. Omit to retain the stored value.
+            port: (Number) SMTP server port (1-65535), e.g. 587.
+            realm_name: (String) Realm name. Immutable.
+            status: (String) Configuration status (configured, verified, failed).
+            token_scope: (String) OAuth 2.0 token scope (when auth_type is oauth2).
+            token_url: (String) OAuth 2.0 token endpoint (when auth_type is oauth2).
+            username: (String) SMTP username (when auth_type is basic).
+        importStatements: []
+    skycloak_theme_assignment:
+        subCategory: ""
+        description: Realm-level custom theme assignment per Keycloak theme type. A singleton per realm; managing this resource asserts the full assignment.
+        name: skycloak_theme_assignment
+        title: skycloak_theme_assignment Resource - skycloak
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "login": "${local.corporate_theme}",
+                  "realm_name": "${skycloak_realm.app.name}"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                login: local.corporate_theme
+                realm_name: skycloak_realm.app.name
+        argumentDocs:
+            account: (String) Custom theme ID to activate for the account console. Omit to use Keycloak's built-in default.
+            admin: (String) Custom theme ID to activate for the admin console. Omit to use Keycloak's built-in default.
+            cluster_id: (String) Cluster ID. Immutable.
+            email: (String) Custom theme ID to activate for the email templates. Omit to use Keycloak's built-in default.
+            id: (String) Composite ID cluster_id/realm_name/theme_assignment.
+            login: (String) Custom theme ID to activate for the login page. Omit to use Keycloak's built-in default.
+            realm_name: (String) Realm name. Immutable.
+        importStatements: []
+    skycloak_webhook_subscription:
+        subCategory: ""
+        description: 'A webhook subscription delivering workspace events to an HTTPS endpoint. signing_secret and authorization_header are write-only: the API never returns them and reads report has_* booleans instead.'
+        name: skycloak_webhook_subscription
+        title: skycloak_webhook_subscription Resource - skycloak
+        examples:
+            - name: ops
+              manifest: |-
+                {
+                  "cluster_id": "${skycloak_cluster.production.id}",
+                  "event_types": [
+                    "LOGIN_ERROR",
+                    "USER_DISABLED_BY_PERMANENT_LOCKOUT"
+                  ],
+                  "name": "ops-alerts",
+                  "signing_secret": "${var.webhook_signing_secret}",
+                  "source": "keycloak",
+                  "url": "https://hooks.example.com/skycloak"
+                }
+              references:
+                cluster_id: skycloak_cluster.production.id
+                signing_secret: var.webhook_signing_secret
+        argumentDocs:
+            authorization_header: (String, Sensitive) Authorization header value sent with each delivery. Write-only; omit to retain the stored value.
+            cluster_id: (String) Scope deliveries to one cluster. Omit for all clusters.
+            created_at: (String)
+            enabled: (Boolean) Whether deliveries are active. Defaults to true.
+            event_types: (List of String) Event types to deliver. See the skycloak_webhook_event_types data source for the catalog.
+            has_authorization_header: (Boolean) Whether an authorization header is stored.
+            has_signing_secret: (Boolean) Whether a signing secret is stored.
+            id: (String) Subscription ID (UUID).
+            name: (String) Subscription name.
+            realm_id: (String) Scope deliveries to one Keycloak realm ID (UUID).
+            signing_secret: (String, Sensitive) HMAC secret used to sign deliveries, 32 to 512 characters. Write-only; never read back.
+            source: '(String) Event source: keycloak or platform.'
+            updated_at: (String)
+            url: (String) HTTPS endpoint receiving deliveries.
+        importStatements: []

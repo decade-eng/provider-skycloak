@@ -1,0 +1,5 @@
+/*
+Copyright 2026 Decade Engineering
+*/
+
+// SPDX-License-Identifier: Apache-2.0
