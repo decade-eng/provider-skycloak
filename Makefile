@@ -269,6 +269,9 @@ schema-version-diff:
 go.cachedir:
 	@go env GOCACHE
 
+go.mod.cachedir:
+	@go env GOMODCACHE
+
 # Update the submodules, such as the common build scripts.
 submodules:
 	@git submodule sync
